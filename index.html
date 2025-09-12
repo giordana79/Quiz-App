@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quiz JS</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+
+  <body>
+    <div class="quiz-container">
+      <h1>Quiz di JavaScript</h1>
+
+      <!-- Testo avanzamento: domanda 3/5 -->
+      <p id="progress-text" class="muted">Preparazione...</p>
+
+      <!-- Barra di avanzamento visiva -->
+      <div id="progress" aria-hidden="true">
+        <div id="progress-bar" style="width: 0%"></div>
+      </div>
+      <!-- timer - conto alla rovescia -->
+      <p id="timer" class="muted">Tempo rimasto: 10s</p>
+
+      <div id="question-container"></div>
+
+      <ul id="answers"></ul>
+
+      <button id="next-btn" style="display: none">Prossima</button>
+      <p id="score"></p>
+
+      <!-- Sezione risultati finali + record -->
+      <div id="results" class="results" style="display: none">
+        <p id="final-score"></p>
+        <p id="high-score"></p>
+        <button id="restart-btn">Ricomincia</button>
+        <button id="clear-storage-btn" class="ghost">Resetta record</button>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
