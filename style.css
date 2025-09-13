@@ -118,3 +118,26 @@ h1 {
 .results {
   margin-top: 12px;
 }
+
+/* Transizioni generali del timer */
+#timer {
+  transition:
+    color 0.5s,
+    transform 0.3s;
+}
+
+/* Colori del timer in base al tempo */
+.timer-green {
+  color: green;
+}
+.timer-orange {
+  color: orange;
+}
+.timer-red {
+  color: red;
+}
+
+/* Effetto "pulse" per gli ultimi 3 secondi */
+.timer-pulse {
+  transform: scale(1.2);
+}

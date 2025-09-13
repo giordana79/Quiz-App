@@ -111,8 +111,14 @@ function startTimer() {
   //Aggiorna il DOM per mostrare all'utente il tempo iniziale rimanente
   timerEl.textContent = `Tempo rimasto: ${timeLeft}s`;
 
-  //Applica una transizione CSS su colore e trasformazione per animazioni fluide
-  timerEl.style.transition = "color 0.5s, transform 0.3s";
+  //Rimuove eventuali classi CSS precedenti applicate al timer
+  //(colore o effetto pulse degli ultimi secondi)
+  timerEl.classList.remove(
+    "timer-green",
+    "timer-orange",
+    "timer-red",
+    "timer-pulse"
+  );
 
   //Avvia il countdown: la funzione dentro setInterval viene eseguita ogni 1000ms (1 secondo)
   timer = setInterval(() => {
@@ -122,25 +128,28 @@ function startTimer() {
     //Aggiorna il DOM con il nuovo valore del timer
     timerEl.textContent = `Tempo rimasto: ${timeLeft}s`;
 
-    //Cambia il colore del testo in base al tempo rimasto
+    //Cambia il colore del testo in base al tempo rimasto ed aggiunge la classe colore associata
     if (timeLeft > 6) {
-      //Tempo iniziale: verde
-      timerEl.style.color = "green";
+      // Tempo iniziale: colore verde
+      timerEl.classList.add("timer-green");
     } else if (timeLeft > 3) {
-      //Tempo medio: arancione
-      timerEl.style.color = "orange";
+      // Tempo medio: colore arancione
+      timerEl.classList.add("timer-orange");
     } else {
-      //Tempo critico: rosso
-      timerEl.style.color = "red";
+      // Tempo critico: colore rosso
+      timerEl.classList.add("timer-red");
     }
+
+    //Rimuove l'effetto pulse precedente
+    timerEl.classList.remove("timer-pulse");
 
     //Aggiunge un effetto "pulse" (ingrandimento) negli ultimi 3 secondi
     if (timeLeft <= 3) {
       //Ingrandisce leggermente
-      timerEl.style.transform = "scale(1.2)";
+      timerEl.classList.add("timer-pulse");
       setTimeout(() => {
         //Riporta alla dimensione normale dopo 300ms
-        timerEl.style.transform = "scale(1)";
+        timerEl.classList.remove("timer-pulse");
       }, 300);
     }
 
@@ -148,22 +157,29 @@ function startTimer() {
     if (timeLeft <= 0) {
       //Ferma il timer
       clearInterval(timer);
+
       //Azzera la streak poiché l'utente non ha risposto in tempo
       streak = 0;
+
       scoreEl.textContent = "Tempo scaduto! Non è più possibile rispondere";
       //Applica classe CSS per colorare il messaggio in rosso
       scoreEl.className = "wrong";
+
       //Disabilita tutti i pulsanti delle risposte
       disableAnswerButtons();
+
       //Mostra il pulsante "Prossima" per continuare
       nextBtn.style.display = "block";
 
-      //Ripristina colore e trasformazione del timer al valore di default
-      timerEl.style.color = "#6b7280";
-      //Dimensione normale
-      timerEl.style.transform = "scale(1)";
+      //Ripristina colore e trasformazione del timer al valore di default rimuovendo. le classi
+      timerEl.classList.remove(
+        "timer-green",
+        "timer-orange",
+        "timer-red",
+        "timer-pulse"
+      );
     }
-  }, 1000); //1000[ms] = 1[s]
+  }, 1000); //La funzione viene eseguita ogni 1000[ms] = 1[s]
 }
 
 //Salva i risultati in localstorage
