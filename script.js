@@ -1,5 +1,5 @@
-// Dati del quiz
-// Array di oggetti: ogni oggetto rappresenta una domanda
+//Dati del quiz
+//Array di oggetti: ogni oggetto rappresenta una domanda
 const quizData = [
   {
     //Testo della domanda
@@ -43,15 +43,15 @@ const quizData = [
   },
 ];
 
-// Stato del quiz a runtime
+//Stato del quiz a runtime
 
-// Indice della domanda attuale (parte da 0)
+//Indice della domanda attuale (parte da 0)
 let currentQuestion = 0;
 
 //Punteggio accumulato dall'utente
 let score = 0;
 
-// streak consecutivo corrette per il bonus
+//Streak consecutivo corrette per il bonus
 let streak = 0;
 
 //Riferimento al setInterval
@@ -60,7 +60,7 @@ let timer;
 //Secondi per domanda
 let timeLeft = 10;
 
-// Collegamenti al DOM
+//Collegamenti al DOM
 
 //<div> dove mostreremo il testo della domanda
 const questionEl = document.getElementById("question-container");
@@ -80,18 +80,18 @@ const highScoreEl = document.getElementById("high-score");
 const restartBtn = document.getElementById("restart-btn");
 const clearStorageBtn = document.getElementById("clear-storage-btn");
 
-// Si prende dal documento HTML l’elemento che ha id="timer"
+//Si prende dal documento HTML l’elemento che ha id="timer"
 const timerEl = document.getElementById("timer");
 
-// Funzioni di utilità
+//Funzioni di utilità
 
-// Aggiorna la UI dell'avanzamento (Domanda X/Y + barra grafica)
+//Aggiorna la UI dell'avanzamento (Domanda X/Y + barra grafica)
 function updateProgress() {
   const total = quizData.length;
   const humanIndex = currentQuestion + 1;
   progressText.textContent = `Domanda ${humanIndex}/${total}`;
 
-  // Calcolo percentuale
+  //Calcolo percentuale
   const pct = (currentQuestion / total) * 100;
   progressBar.style.width = `${pct}%`;
 }
@@ -100,46 +100,70 @@ function disableAnswerButtons() {
   const buttons = answersEl.querySelectorAll("button");
   buttons.forEach((b) => (b.disabled = true));
 }
-//Funzione Timer 10sec
+//Funzione per impostare il countdown
 function startTimer() {
-  //Ferma timer precedenti per evitare che più setInterval siano attivi contemporaneamente
+  //Ferma eventuali timer già attivi per evitare che più setInterval siano in esecuzione
   clearInterval(timer);
 
   //Imposta il tempo iniziale per la domanda (10 secondi)
   timeLeft = 10;
 
-  //Aggiorna  il DOM per mostrare all'utente il tempo rimanente
+  //Aggiorna il DOM per mostrare all'utente il tempo iniziale rimanente
   timerEl.textContent = `Tempo rimasto: ${timeLeft}s`;
 
-  //Avvia il countdown: esegue la funzione ogni 1000[ms] (1[s])
+  //Applica una transizione CSS su colore e trasformazione per animazioni fluide
+  timerEl.style.transition = "color 0.5s, transform 0.3s";
+
+  //Avvia il countdown: la funzione dentro setInterval viene eseguita ogni 1000ms (1 secondo)
   timer = setInterval(() => {
-    //Decrementa il tempo rimasto di 1[s]
+    //Decrementa il tempo rimanente di 1 secondo
     timeLeft--;
 
-    //Aggiorna il testo nel DOM per mostrare all'utente il tempo aggiornato
+    //Aggiorna il DOM con il nuovo valore del timer
     timerEl.textContent = `Tempo rimasto: ${timeLeft}s`;
 
-    //Controlla se il timer è terminato
-    if (timeLeft <= 0) {
-      // Ferma il timer
-      clearInterval(timer);
-
-      //Azzera la streak poichèl'utente non ha risposto in tempo
-      streak = 0;
-
-      //Mostra messaggio di risposta sbagliata nel DOM
-      scoreEl.textContent = "Tempo scaduto! Non è più possibile rispondere";
-
-      //Applica la classe CSS "wrong" per colorare il messaggio in rosso
-      scoreEl.className = "wrong";
-
-      //Disabilita i pulsanti delle risposte per impedire ulteriori click
-      disableAnswerButtons();
-
-      //Mostra il pulsante "Prossima" per permettere all'utente di continuare
-      nextBtn.style.display = "block";
+    //Cambia il colore del testo in base al tempo rimasto
+    if (timeLeft > 6) {
+      //Tempo iniziale: verde
+      timerEl.style.color = "green";
+    } else if (timeLeft > 3) {
+      //Tempo medio: arancione
+      timerEl.style.color = "orange";
+    } else {
+      //Tempo critico: rosso
+      timerEl.style.color = "red";
     }
-  }, 1000); // 1000 [ms] = 1 [s]
+
+    //Aggiunge un effetto "pulse" (ingrandimento) negli ultimi 3 secondi
+    if (timeLeft <= 3) {
+      //Ingrandisce leggermente
+      timerEl.style.transform = "scale(1.2)";
+      setTimeout(() => {
+        //Riporta alla dimensione normale dopo 300ms
+        timerEl.style.transform = "scale(1)";
+      }, 300);
+    }
+
+    //Se il tempo scade (0 secondi o meno)
+    if (timeLeft <= 0) {
+      //Ferma il timer
+      clearInterval(timer);
+      //Azzera la streak poiché l'utente non ha risposto in tempo
+      streak = 0;
+      scoreEl.textContent = "Tempo scaduto! Non è più possibile rispondere";
+      //Applica classe CSS per colorare il messaggio in rosso
+      scoreEl.className = "wrong";
+      //Disabilita tutti i pulsanti delle risposte
+      disableAnswerButtons();
+      //Mostra il pulsante "Prossima" per continuare
+      nextBtn.style.display = "block";
+
+      //Ripristina colore e trasformazione del timer al valore di default
+      timerEl.style.color = "#6b7280";
+      //Dimensione normale
+      timerEl.style.transform = "scale(1)";
+    }
+  }, 1000); //1000[ms] = 1[s]
 }
 
 //Salva i risultati in localstorage
@@ -160,65 +184,68 @@ function getHighScore() {
 }
 
 function saveQuizHistory(finalScore) {
-  // Crea un oggetto che rappresenta un singolo quiz completato
+  //Crea un oggetto che rappresenta un singolo quiz completato
   const entry = {
-    score: finalScore, // punteggio ottenuto in questo quiz
-    date: new Date().toLocaleString(), // data e ora locali in cui il quiz è stato completato
-    totalQuestions: quizData.length, // numero totale di domande del quiz
+    //Punteggio ottenuto in questo quiz
+    score: finalScore,
+    //Data e ora locali in cui il quiz è stato completato
+    date: new Date().toLocaleString(),
+    //Numero totale di domande del quiz
+    totalQuestions: quizData.length,
   };
 
-  // Legge la cronologia esistente dal localStorage
-  // Se non esiste nulla, inizializza come array vuoto
+  //Legge la cronologia esistente dal localStorage
+  //Se non esiste nulla, inizializza come array vuoto
   const history = JSON.parse(localStorage.getItem("quiz:history") || "[]");
 
-  // Aggiunge il nuovo quiz alla fine dell'array della cronologia
+  //Aggiunge il nuovo quiz alla fine dell'array della cronologia
   history.push(entry);
 
-  // Mantiene solo gli ultimi 10 quiz
-  // Se ci sono più di 10 elementi, rimuove il primo (il più vecchio)
+  //Mantiene solo gli ultimi 10 quiz
+  //Se ci sono più di 10 elementi, rimuove il primo (il più vecchio)
   while (history.length > 10) {
-    // rimuove il quiz più vecchio dall'inizio dell'array
+    //Rimuove il quiz più vecchio dall'inizio dell'array
     history.shift();
   }
 
-  // Salva la cronologia aggiornata nel localStorage
+  //Salva la cronologia aggiornata nel localStorage
   //Si converte l'array in stringa JSON per poterlo salvare
   localStorage.setItem("quiz:history", JSON.stringify(history));
 }
 
-// Funzione per leggere la cronologia dei quiz completati
+//Funzione per leggere la cronologia dei quiz completati
 function getQuizHistory() {
-  // Restituisce l'array dei quiz completati dal localStorage
-  // Se non è popolato, restituisce un array vuoto
+  //Restituisce l'array dei quiz completati dal localStorage
+  //Se non è popolato, restituisce un array vuoto
   return JSON.parse(localStorage.getItem("quiz:history") || "[]");
 }
 
 //Funzione: carica/mostra una domanda
 
 function loadQuestion() {
-  //svuota la lista delle risposte da ventuali domande precedenti
+  //Svuota la lista delle risposte da ventuali domande precedenti
   answersEl.innerHTML = "";
-  //svuola il feedback sotto
+  //Svuola il feedback sotto
   scoreEl.textContent = "";
   scoreEl.className = ""; // rimuove classi correct e wrong
   nextBtn.style.display = "none";
 
-  // Aggiorna avanzamento (testo + barra)
+  //Aggiorna avanzamento (testo + barra)
   updateProgress();
 
   //Ricava l'oggetto domanda corrente partendo dall'indice
   const q = quizData[currentQuestion];
 
-  //Mostra il testo della domanda nel relatico contenitore
+  //Mostra il testo della domanda nel relativo contenitore
   questionEl.textContent = q.question;
 
   //Per ogni rispsota disponibile...
   q.answers.forEach((answer, index) => {
-    // Crea un <li> per mantenere pulita la lista
+    //Crea un <li> per mantenere pulita la lista
     const li = document.createElement("li");
     //Crea un pulsante per la rispsota
     const btn = document.createElement("button");
-    // Testo del pulsante = testo della rispsota
+    //Testo del pulsante = testo della rispsota
     btn.textContent = answer;
 
     btn.onclick = () => checkAnswer(index);
@@ -232,16 +259,16 @@ function loadQuestion() {
   startTimer();
 }
 
-// Funzione: verifica la risposta
+//Funzione: verifica la risposta
 
 function checkAnswer(index) {
   //Ferma il timer quando l'utente risponde
   clearInterval(timer);
 
-  //Recuperiamo la domanda corrente
+  //Recupera la domanda corrente
   const q = quizData[currentQuestion];
 
-  // Se l'indice coincide con quello corretto allora incrementa il punteggio
+  //Se l'indice coincide con quello corretto allora incrementa il punteggio
   if (index === q.correct) {
     //Aggiorna streak e calcola bonus
     streak += 1;
@@ -251,7 +278,7 @@ function checkAnswer(index) {
     //Aggiorna punteggio
     score += gained;
 
-    // Mostra messaggio di risposta corretta
+    //Mostra messaggio di risposta corretta
     scoreEl.textContent =
       bonus > 0
         ? `OK Risposta corretta! +${gained} ( 1 base + ${bonus} bonus streak)`
@@ -270,7 +297,7 @@ function checkAnswer(index) {
   nextBtn.style.display = "block";
 }
 
-// Avanzamento / fine quiz
+//Avanzamento / fine quiz
 
 // Gestione del pulsante prossima
 nextBtn.addEventListener("click", () => {
@@ -279,7 +306,7 @@ nextBtn.addEventListener("click", () => {
   //Aggiorna barar di avanzamento
   updateProgress();
 
-  // Se ci sono ancora domande...
+  //Se ci sono ancora domande...
   if (currentQuestion < quizData.length) {
     loadQuestion();
   } else {
@@ -319,13 +346,13 @@ restartBtn.addEventListener("click", () => {
   loadQuestion();
 });
 
-/* Cancella record e ultimo punteggio dal localStorage */
+//Cancella record e ultimo punteggio dal localStorage //
 clearStorageBtn.addEventListener("click", () => {
   localStorage.removeItem("quiz:highScore");
   localStorage.removeItem("quiz:lastScore");
   highScoreEl.textContent = "Record azzerato.";
 });
 
-// Avvio dell'app: carica la prima domanda
+//Avvio dell'app: carica la prima domanda
 
 loadQuestion();
